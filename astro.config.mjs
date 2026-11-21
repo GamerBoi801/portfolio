@@ -7,8 +7,7 @@ import react from '@astrojs/react';
 import { SITE } from './src/site.config';
 
 export default defineConfig({
-  site: 'https://GamerBoi801.github.io',
-  base: '/portfolio',
+  site: SITE.url,
   image: {
     service: passthroughImageService(),
   },
