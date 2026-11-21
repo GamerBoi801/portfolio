@@ -1,18 +1,19 @@
 ---
-role: Machine Learning & Security Research Intern
-org: Tech Research Lab
-orgUrl: https://TODO-owner.example.com
-location: Remote
+role: Artifical Intelligence Intern
+org: TallyMarks Consulting
+orgUrl: https://tmcltd.com/
+location: Lahore
 type: internship
 start: 2026-06-01
-end: 2026-08-31
-summary: Researched telemetry fault detection and drone mission supervisor stability using simulated flight telemetry.
+end: 2026-07-15
+summary: Worked on Real world, Technical, and company projects
 highlights:
-  - Developed real-time telemetry processing pipelines in Python and MAVLink.
+  - Developed a Financial based RAG system that parses financial and Quarterly reports, and reported a 0pc hallucination.
   - Implemented fault injection harnesses evaluating energy-aware return-to-home algorithms.
   - Reduced simulated false-positive trigger rates by 18%.
 tech:
   - Python
+  - Kubernetes
   - MAVLink
   - ArduPilot
   - PyTorch

@@ -197,6 +197,20 @@ const socials = defineCollection({
   }),
 });
 
+const certifications = defineCollection({
+  loader: file('src/content/certifications.yaml'),
+  schema: z.object({
+    id: z.string(),
+    title: z.string(),
+    issuer: z.string(),
+    date: z.coerce.date(),
+    url: url.optional(),
+    credentialId: z.string().optional(),
+    skills: z.array(z.string()).default([]),
+    description: z.string().optional(),
+  }),
+});
+
 export const collections = {
   projects,
   publications,
@@ -206,4 +220,5 @@ export const collections = {
   achievements,
   skills,
   socials,
+  certifications,
 };

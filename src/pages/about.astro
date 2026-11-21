@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../site.config';
 import { formatDate } from '../lib/utils';
+import GitHubProjects from '../components/GitHubProjects';
 
 const education = await getCollection('education');
 const experience = await getCollection('experience');
@@ -13,6 +14,9 @@ const sortedSkills = skills.sort((a, b) => a.data.order - b.data.order);
 
 const achievements = await getCollection('achievements');
 const sortedAchievements = achievements.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const certifications = await getCollection('certifications');
+const sortedCertifications = certifications.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
 <BaseLayout
@@ -32,7 +36,7 @@ const sortedAchievements = achievements.sort((a, b) => b.data.date.getTime() - a
         I am a cybersecurity student and autonomous systems researcher focused on building fault-tolerant software, reverse engineering low-level binaries, and investigating telemetry fault containment.
       </p>
       <p class="text-base text-text/80 font-serif leading-relaxed">
-        Currently pursuing a BS in Cybersecurity at Ghulam Ishaq Khan Institute (GIKI), expected to graduate in June 2027. I spend my time writing Python and Rust supervisors for ArduPilot SITL, analyzing Linux kernel internals, competing in CTFs, and preparing for Summer 2027 systems & security research internships.
+        Currently pursuing a BS in Cybersecurity at Ghulam Ishaq Khan Institute (GIKI), expected to graduate in June 2029. I spend my time writing Python and Rust supervisors for ArduPilot SITL, analyzing Linux kernel internals, competing in CTFs, and preparing for Summer 2027 systems & security research internships.
       </p>
     </header>
 
@@ -212,6 +216,69 @@ const sortedAchievements = achievements.sort((a, b) => b.data.date.getTime() - a
           </div>
         ))}
       </div>
+    </section>
+
+    <!-- COURSES & CERTIFICATIONS -->
+    <section class="mb-16">
+      <span class="section-label">~/certifications</span>
+      <h2 class="text-2xl font-semibold text-heading mb-6">Courses & Certifications</h2>
+
+      <div class="space-y-4">
+        {sortedCertifications.map((cert) => (
+          <div class="matrix-card p-5 group flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-mono text-[11px] text-accent uppercase">[{cert.data.issuer}]</span>
+                {cert.data.credentialId && (
+                  <span class="font-mono text-xs text-muted">
+                    ID: {cert.data.credentialId}
+                  </span>
+                )}
+              </div>
+              <h3 class="text-base font-semibold text-heading group-hover:text-accent transition-colors">
+                {cert.data.title}
+              </h3>
+              {cert.data.description && (
+                <p class="font-serif text-xs text-text/80 mt-1">
+                  {cert.data.description}
+                </p>
+              )}
+              {cert.data.skills && cert.data.skills.length > 0 && (
+                <div class="flex flex-wrap gap-1.5 font-mono text-xs mt-3">
+                  {cert.data.skills.map((s) => (
+                    <span class="text-muted">[{s}]</span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 font-mono text-xs text-muted shrink-0">
+              <span>{formatDate(cert.data.date)}</span>
+              {cert.data.url && (
+                <a
+                  href={cert.data.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-accent hover:underline text-xs"
+                >
+                  verify &rarr;
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- GITHUB PROJECTS (LIVE API VIA REACT) -->
+    <section class="mb-16">
+      <span class="section-label">~/github-projects</span>
+      <h2 class="text-2xl font-semibold text-heading mb-2">GitHub Projects</h2>
+      <p class="font-serif text-sm text-text/80 mb-6">
+        Live repositories fetched directly from the GitHub REST API using React with active loading and error states.
+      </p>
+
+      <GitHubProjects client:load username="GamerBoi801" limit={6} />
     </section>
 
     <!-- RESUME CALLOUT -->

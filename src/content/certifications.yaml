@@ -1,0 +1,13 @@
+- id: cs50x
+  title: "CS50x: Introduction to Computer Science"
+  issuer: Harvard University (edX)
+  date: 2024-06-20
+  url: https://cs50.harvard.edu/certificates/TODO(owner)
+  credentialId: CS50x-2024-XYZ987
+  description: "An intensive introduction to the intellectual enterprises of computer science and the art of programming. Covers algorithms, data structures, memory management, and computational thinking using C, Python, SQL, and Web technologies."
+  skills:
+    - C
+    - Python
+    - SQL
+    - Algorithms
+    - Memory Management

@@ -3,10 +3,11 @@
   items:
     - Python
     - Rust
+    - SQL
     - C/C++
-    - Go
+    - HTML
     - TypeScript
-    - Bash
+    - CSS/JS
   order: 1
 - id: security
   group: Security & Systems
@@ -30,6 +31,8 @@
 - id: tools
   group: Tools & Infra
   items:
+    - Linux
+    - Bash
     - Git
     - Docker
     - Ghidra

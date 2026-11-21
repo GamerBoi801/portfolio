@@ -7,14 +7,17 @@ expectedEnd: 2027-06-30
 gpa: 3.8
 showGpa: false
 courses:
-  - Computer Networks & Security
-  - Operating Systems & Concurrency
+  # - Computer Networks & Security
+  # - Operating Systems & Concurrency
   - Design & Analysis of Algorithms
   - Cryptography & Network Security
   - Computer Architecture
-  - Artificial Intelligence & Machine Learning
+  - Data Structures & Algorithms
+  -  Machine Learning
+  - Deep Learning
 activities:
-  - Lead, Cybersecurity & CTF Club
+  - Research, Dev Team(MLSA), Netronix Network Support Engineer
   - Competitive Programming Team Member
+
 ---
 Focusing on low-level systems security, offensive security, and autonomous UAV control systems.

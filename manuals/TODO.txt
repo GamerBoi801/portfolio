@@ -1,0 +1,2 @@
+1. change the lsit of projects
+2. read the other fiela andmake sure INFO is updated

@@ -6,13 +6,13 @@
   order: 1
 - id: linkedin
   label: LinkedIn
-  url: https://linkedin.com/in/TODO(owner)
+  url: https://www.linkedin.com/in/shahmeer-khan-b94264310/
   icon: simple-icons:linkedin
   inHero: true
   order: 2
 - id: codeforces
   label: Codeforces
-  url: https://codeforces.com/profile/TODO(owner)
+  url: https://codeforces.com/profile/unknow_7586
   icon: simple-icons:codeforces
   inHero: false
   order: 3
@@ -24,7 +24,7 @@
   order: 4
 - id: email
   label: Email
-  url: mailto:TODO(owner)@example.com
+  url: mailto:MSK_working@proton.me
   icon: lucide:mail
   inHero: true
   order: 5

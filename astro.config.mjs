@@ -3,10 +3,12 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
 import icon from 'astro-icon';
+import react from '@astrojs/react';
 import { SITE } from './src/site.config';
 
 export default defineConfig({
-  site: SITE.url,
+  site: 'https://GamerBoi801.github.io',
+  base: '/portfolio',
   image: {
     service: passthroughImageService(),
   },
@@ -14,6 +16,7 @@ export default defineConfig({
     tailwind({
       applyBaseStyles: false,
     }),
+    react(),
     mdx(),
     sitemap(),
     icon(),
