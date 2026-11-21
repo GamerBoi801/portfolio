@@ -1,0 +1,125 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={['relative overflow-hidden', className]}>
+  <canvas
+    id="matrix-rain-canvas"
+    class="absolute inset-0 w-full h-full pointer-events-none opacity-[0.11] z-0"
+    aria-hidden="true"
+  ></canvas>
+  <div class="relative z-10">
+    <slot />
+  </div>
+</div>
+
+<script>
+  // DS-8, DS-10: Matrix digital rain canvas behind hero
+  function initMatrixRain() {
+    // DS-10: Respect prefers-reduced-motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const canvas = document.getElementById('matrix-rain-canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number | null = null;
+    let isVisible = true;
+    let isTabActive = true;
+    let lastDrawTime = 0;
+    const fps = 20;
+    const interval = 1000 / fps;
+
+    // Characters: Katakana and digits
+    const chars = 'ｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈﾊﾋﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾜ0123456789';
+    const fontSize = 14;
+    let columns = 0;
+    let drops: number[] = [];
+
+    function resize() {
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      columns = Math.floor(canvas.width / fontSize);
+      drops = [];
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.floor(Math.random() * -30);
+      }
+    }
+
+    function draw(currentTime: number) {
+      if (!isVisible || !isTabActive) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
+
+      if (currentTime - lastDrawTime < interval) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
+
+      lastDrawTime = currentTime;
+
+      if (!ctx || !canvas) return;
+
+      // Semi-transparent background fade
+      ctx.fillStyle = 'rgba(5, 8, 5, 0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#00ff41';
+      ctx.font = `${fontSize}px "JetBrains Mono Variable", monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        ctx.fillText(char, x, y);
+
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+
+      animationFrameId = requestAnimationFrame(draw);
+    }
+
+    // Observer: Pause when hero is scrolled out of view
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisible = entry.isIntersecting;
+        });
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
+
+    // Tab visibility: Pause when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+      isTabActive = !document.hidden;
+    });
+
+    window.addEventListener('resize', resize);
+    resize();
+    animationFrameId = requestAnimationFrame(draw);
+
+    // Cleanup if navigated
+    document.addEventListener('astro:before-swap', () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+    }, { once: true });
+  }
+
+  initMatrixRain();
+</script>

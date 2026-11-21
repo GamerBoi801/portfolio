@@ -1,0 +1,37 @@
+---
+title: Neural Decompiler
+tagline: Transformer-based x86-64 assembly to C pseudocode decompiler
+summary: >
+  A fine-tuned sequence-to-sequence model designed to reconstruct high-level C
+  control flow and variable typing from stripped x86-64 disassembly.
+category: ml-ai
+tags: [Python, PyTorch, Transformers, Ghidra]
+status: in-progress
+startDate: 2026-08-01
+role: Solo developer
+teamSize: 1
+highlights:
+  - "Trained on 40,000 compiled open-source C functions across GCC optimization levels"
+featured: true
+priority: 3
+cover: ./cover.png
+coverAlt: Comparison of disassembled assembly and generated C pseudocode
+links:
+  repo: https://github.com/GamerBoi801/neural-decompiler
+draft: false
+---
+
+## Problem
+Reverse engineering stripped binaries is tedious and time-consuming. Commercial decompilers often produce convoluted gotos and unreadable variable names.
+
+## Approach
+Combined tokenized assembly graphs from Ghidra with a fine-tuned transformer model conditioned on control flow graph (CFG) representations.
+
+## Results
+TODO(owner): Provide BLEU / structural similarity metric scores.
+
+## Challenges and what I learned
+Managing context window limitations on long assembly functions with extensive switch-case tables.
+
+## What's next
+Adding support for ARM64 architecture binaries.

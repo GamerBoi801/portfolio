@@ -1,0 +1,254 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import MatrixRain from '../components/MatrixRain.astro';
+import { SITE } from '../site.config';
+import { sortProjects } from '../lib/projects';
+import { formatDate } from '../lib/utils';
+
+// Projects
+const allProjects = await getCollection('projects', ({ data }) => !data.draft);
+const sortedProjects = sortProjects(allProjects);
+const featuredProjects = sortedProjects.filter((p) => p.data.featured).slice(0, 4);
+
+// Publications
+const allPublications = await getCollection('publications');
+const latestPublications = allPublications
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 2);
+
+// Posts
+const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+const latestPosts = allPosts
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 2);
+---
+
+<BaseLayout maxWidth="grid">
+  <!-- HERO SECTION (FR-6, FR-7, DS-8 to DS-10) -->
+  <MatrixRain class="border-b border-border">
+    <section class="py-16 sm:py-24">
+      <div class="max-w-prose">
+        <!-- Terminal Section Label -->
+        <span class="section-label">~/identity</span>
+
+        <!-- Availability Badge (FR-6) -->
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 mb-6 border border-accent/40 bg-accent/5 rounded-[2px] font-mono text-xs text-accent">
+          <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+          <span>{SITE.status}</span>
+        </div>
+
+        <!-- H1 Name with Glow (DS-7) -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold text-heading tracking-tight mb-4 glow-text leading-[1.1]">
+          {SITE.name}
+        </h1>
+
+        <!-- One-line headline with CSS blinking cursor (DS-9, DS-10) -->
+        <p class="text-xl sm:text-2xl text-accent font-medium mb-6 flex items-center flex-wrap">
+          <span>{SITE.headline}</span>
+          <span class="blinking-cursor" aria-hidden="true"></span>
+        </p>
+
+        <!-- Short Bio -->
+        <p class="text-lg text-text leading-relaxed mb-8 font-serif">
+          {SITE.bio}
+        </p>
+
+        <!-- Primary Action Buttons (FR-7) -->
+        <div class="flex flex-wrap items-center gap-4 font-mono text-xs sm:text-sm pt-2">
+          <a
+            href="/projects"
+            class="bg-accent text-bg font-semibold px-4 py-2.5 rounded-[2px] hover:bg-accent-dim transition-colors flex items-center gap-2"
+          >
+            <span>View projects</span>
+            <span>&rarr;</span>
+          </a>
+
+          <a
+            href={SITE.resume}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="border border-accent text-accent px-4 py-2.5 rounded-[2px] hover:bg-accent/10 transition-colors flex items-center gap-2 font-medium"
+          >
+            <span>Download resume</span>
+            <span class="text-xs text-muted">[PDF]</span>
+          </a>
+
+          <a
+            href="#contact"
+            class="text-muted hover:text-accent px-3 py-2.5 transition-colors underline-offset-4 hover:underline"
+          >
+            Contact &darr;
+          </a>
+        </div>
+      </div>
+    </section>
+  </MatrixRain>
+
+  <!-- "CURRENTLY" STATUS BLOCK (FR-9) -->
+  <section class="py-12 border-b border-border">
+    <div class="max-w-prose">
+      <span class="section-label">~/status/currently</span>
+      <h2 class="text-xl font-semibold text-heading mb-4">Currently building & learning</h2>
+      <ul class="space-y-2 font-mono text-sm">
+        {SITE.currently.map((item) => (
+          <li class="flex items-start gap-2.5 text-text">
+            <span class="text-accent select-none">&bull;</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- FEATURED PROJECTS STRIP (FR-8) -->
+  <section id="projects" class="py-16 sm:py-24 border-b border-border">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+      <div>
+        <span class="section-label">~/projects/featured</span>
+        <h2 class="text-3xl font-semibold text-heading">Featured Projects</h2>
+      </div>
+      <a
+        href="/projects"
+        class="font-mono text-sm text-accent hover:underline underline-offset-2 flex items-center gap-1 self-start sm:self-auto"
+      >
+        <span>View all {allProjects.length} projects</span>
+        <span>&rarr;</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      {featuredProjects.map((project) => (
+        <ProjectCard project={project} featured={true} />
+      ))}
+    </div>
+  </section>
+
+  <!-- LATEST PUBLICATIONS & POSTS (FR-10) -->
+  <section class="py-16 sm:py-24">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16">
+      
+      <!-- Latest Research & Preprints -->
+      <div>
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <span class="section-label">~/publications/recent</span>
+            <h2 class="text-2xl font-semibold text-heading">Recent Publications</h2>
+          </div>
+          <a href="/publications" class="font-mono text-xs text-accent hover:underline underline-offset-2">
+            all publications &rarr;
+          </a>
+        </div>
+
+        {latestPublications.length > 0 ? (
+          <div class="space-y-6">
+            {latestPublications.map((pub) => (
+              <div class="matrix-card p-5 group">
+                <span class="font-mono text-[11px] text-accent tracking-wide uppercase">[{pub.data.type}]</span>
+                <h3 class="text-lg font-semibold text-heading group-hover:text-accent transition-colors my-2">
+                  <a href="/publications" class="hover:underline underline-offset-2">
+                    {pub.data.title}
+                  </a>
+                </h3>
+                <p class="font-mono text-xs text-muted mb-3">
+                  {pub.data.venue} &bull; {formatDate(pub.data.date)}
+                </p>
+                <div class="flex gap-4 font-mono text-xs">
+                  {pub.data.links.arxiv && (
+                    <a href={pub.data.links.arxiv} target="_blank" rel="noopener noreferrer" class="text-accent hover:underline underline-offset-2">
+                      arXiv &rarr;
+                    </a>
+                  )}
+                  {pub.data.links.code && (
+                    <a href={pub.data.links.code} target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent hover:underline underline-offset-2">
+                      code &rarr;
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="font-mono text-sm text-muted">Research in progress.</p>
+        )}
+      </div>
+
+      <!-- Latest Writing & Write-ups -->
+      <div>
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <span class="section-label">~/writing/recent</span>
+            <h2 class="text-2xl font-semibold text-heading">Latest Writing</h2>
+          </div>
+          <a href="/writing" class="font-mono text-xs text-accent hover:underline underline-offset-2">
+            all posts &rarr;
+          </a>
+        </div>
+
+        {latestPosts.length > 0 ? (
+          <div class="space-y-6">
+            {latestPosts.map((post) => (
+              <div class="matrix-card p-5 group">
+                <div class="flex items-center justify-between text-xs font-mono text-muted mb-2">
+                  <span class="text-accent font-mono uppercase text-[11px]">[{post.data.category}]</span>
+                  <span>{formatDate(post.data.pubDate)}</span>
+                </div>
+                <h3 class="text-lg font-semibold text-heading group-hover:text-accent transition-colors mb-2">
+                  <a href={`/writing/${post.id}`} class="hover:underline underline-offset-2">
+                    {post.data.title}
+                  </a>
+                </h3>
+                <p class="font-serif text-sm text-text/80 line-clamp-2">
+                  {post.data.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="font-mono text-sm text-muted">Notes and write-ups coming soon.</p>
+        )}
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT ANCHOR SECTION (FR-22) -->
+  <section id="contact" class="py-16 border-t border-border">
+    <div class="max-w-prose">
+      <span class="section-label">~/contact</span>
+      <h2 class="text-3xl font-semibold text-heading mb-4">Get in touch</h2>
+      <p class="text-text font-serif leading-relaxed mb-6">
+        Whether you are recruiting for Summer 2027 internships, interested in research collaboration in autonomous systems and cybersecurity, or discussing CTFs — feel free to reach out.
+      </p>
+      <div class="flex flex-wrap items-center gap-6 font-mono text-sm">
+        <a
+          href={`mailto:${SITE.email}`}
+          class="bg-accent text-bg font-semibold px-4 py-2.5 rounded-[2px] hover:bg-accent-dim transition-colors flex items-center gap-2"
+        >
+          <SocialIcon icon="lucide:mail" class="w-4 h-4" />
+          <span>Send email</span>
+        </a>
+        <a
+          href="https://github.com/GamerBoi801"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="border border-border hover:border-accent text-text hover:text-accent px-4 py-2.5 rounded-[2px] transition-colors flex items-center gap-2"
+        >
+          <SocialIcon icon="simple-icons:github" class="w-4 h-4" />
+          <span>GitHub</span>
+        </a>
+        <a
+          href="https://linkedin.com/in/TODO(owner)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="border border-border hover:border-accent text-text hover:text-accent px-4 py-2.5 rounded-[2px] transition-colors flex items-center gap-2"
+        >
+          <SocialIcon icon="simple-icons:linkedin" class="w-4 h-4" />
+          <span>LinkedIn</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

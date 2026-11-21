@@ -1,0 +1,26 @@
+---
+title: "Analyzing a Corrupted Heap State: Pwn Challenge Breakdown"
+description: "A deep dive into heap consolidation and tcache poisoning techniques used in a recent CTF pwn challenge."
+pubDate: 2026-10-15
+category: ctf
+tags: [pwn, heap, binary-exploitation, linux]
+ctf:
+  event: "CyberDefense CTF 2026"
+  challenge: "HeapMaster"
+  category: "pwn"
+  points: 450
+draft: false
+---
+
+## Overview
+
+In this challenge, we were provided with a 64-bit ELF binary running glibc 2.35.
+
+```c
+void *ptr = malloc(0x80);
+free(ptr);
+```
+
+## Vulnerability
+
+The program contained a use-after-free (UAF) condition allowing arbitrary pointer overwrite on the heap. By forging a forward link in the tcache bucket, we redirected execution flow to obtain an interactive shell.

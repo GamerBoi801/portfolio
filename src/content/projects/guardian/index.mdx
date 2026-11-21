@@ -1,0 +1,38 @@
+---
+title: GUARDIAN
+tagline: MAVLink mission supervisor with energy-aware return-to-home
+summary: >
+  A Python supervisor that watches UAV health over MAVLink, decides when to
+  return home based on remaining energy, and is tested with fault injection.
+category: embedded-robotics
+tags: [Python, MAVLink, ArduPilot, SITL]
+status: in-progress
+startDate: 2026-10-01
+role: Solo developer
+teamSize: 1
+highlights:
+  - "TODO(owner): measured result e.g. 99.4% fault containment in SITL tests"
+  - "Tested against 12 simulated failure scenarios with automated recovery"
+featured: true
+priority: 1
+cover: ./cover.png
+coverAlt: GUARDIAN dashboard showing live telemetry from ArduPilot SITL
+links:
+  repo: https://github.com/GamerBoi801/guardian
+draft: false
+---
+
+## Problem
+Autonomous UAV operations frequently suffer from unexpected battery voltage drops and sensor degradation. Without an active supervisor, a drone may fail to execute return-to-home (RTH) before critical power depletion.
+
+## Approach
+GUARDIAN attaches as a companion supervisor via MAVLink to ArduPilot SITL. It continuously computes estimated energy-to-home taking dynamic wind vectors into account.
+
+## Results
+TODO(owner): Provide quantitative performance numbers from SITL test runs.
+
+## Challenges and what I learned
+Handling noisy MAVLink packets and reconciling state divergence between the companion supervisor and flight controller.
+
+## What's next
+Hardware-in-the-loop (HITL) testing with physical Pixhawk flight controllers and real telemetry radios.

@@ -1,0 +1,39 @@
+---
+title: Sentinel-IDS
+tagline: High-throughput eBPF network intrusion detection engine
+summary: >
+  A lightweight network intrusion detection system leveraging Linux eBPF and XDP
+  for kernel-level packet inspection and zero-copy anomaly detection.
+category: security
+tags: [Rust, eBPF, Linux, C, Networks]
+status: completed
+startDate: 2026-03-01
+endDate: 2026-07-15
+role: Solo developer
+teamSize: 1
+highlights:
+  - "Filtered 1.2M packets/sec with sub-millisecond inspection latency"
+  - "Zero-copy packet parsing directly inside XDP driver hook"
+featured: true
+priority: 2
+cover: ./cover.png
+coverAlt: Sentinel-IDS throughput and packet inspection rate graphs
+links:
+  repo: https://github.com/GamerBoi801/sentinel-ids
+draft: false
+---
+
+## Problem
+Traditional user-space packet inspection engines incur significant CPU overhead due to kernel-to-user buffer copying under multi-gigabit traffic.
+
+## Approach
+Implemented an in-kernel XDP filter written in C that parses packet headers at line rate and forwards flagged flows to a Rust user-space analytics daemon via ring buffers.
+
+## Results
+TODO(owner): Add measured p99 latency comparisons under synthetic DDoS workloads.
+
+## Challenges and what I learned
+Verifying eBPF bytecode compliance with the Linux kernel in-kernel verifier constraints.
+
+## What's next
+Integration of lightweight ML inference directly in userspace for anomaly classification.

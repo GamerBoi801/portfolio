@@ -1,0 +1,64 @@
+---
+import { SITE } from '../site.config';
+
+const pathname = new URL(Astro.request.url).pathname;
+const currentPath = pathname.replace(/\/$/, '') || '/';
+
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Publications', href: '/publications' },
+  { label: 'Writing', href: '/writing' },
+  { label: 'About', href: '/about' },
+];
+
+function isActive(href: string): boolean {
+  if (href === '/') {
+    return currentPath === '/';
+  }
+  return currentPath.startsWith(href);
+}
+---
+
+<header class="w-full border-b border-border bg-bg/95 backdrop-blur-sm sticky top-0 z-40 transition-colors">
+  <div class="max-w-grid mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Brand / Root -->
+    <a href="/" class="font-mono text-sm tracking-tight text-accent hover:underline underline-offset-2 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+      <span class="text-muted">~</span>
+      <span class="font-semibold text-heading hover:text-accent transition-colors">{SITE.name}</span>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav class="flex items-center gap-4 sm:gap-6 font-mono text-xs sm:text-sm overflow-x-auto py-2">
+      {navItems.map((item) => {
+        const active = isActive(item.href);
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'transition-all duration-150 py-1 px-1 relative',
+              active
+                ? 'text-accent font-semibold glow-text'
+                : 'text-text hover:text-accent hover:underline underline-offset-2',
+            ]}
+            aria-current={active ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+
+      <!-- Resume Link (FR-1: One click from every page) -->
+      <a
+        href={SITE.resume}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-accent border border-accent/40 hover:border-accent hover:bg-accent/10 px-2.5 py-1 rounded-[2px] transition-colors flex items-center gap-1 font-semibold text-xs sm:text-sm"
+        title="Download Resume (PDF)"
+      >
+        <span>Resume</span>
+        <span class="text-[10px] text-muted">[PDF]</span>
+      </a>
+    </nav>
+  </div>
+</header>

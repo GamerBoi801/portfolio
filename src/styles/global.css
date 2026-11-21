@@ -1,0 +1,160 @@
+@import '@fontsource-variable/source-serif-4';
+@import '@fontsource-variable/jetbrains-mono';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg:        #050805;  /* page background, near-black with a green tint */
+  --surface:   #0b120c;  /* cards, code blocks */
+  --border:    #1a2b1d;  /* 1px borders, dividers */
+  --text:      #cfe8d2;  /* body text, soft phosphor */
+  --heading:   #e8f5e9;  /* headings */
+  --muted:     #6b8f72;  /* metadata, dates, captions (min 4.5:1 on --bg) */
+  --accent:    #00ff41;  /* Matrix green: links, active nav, highlights */
+  --accent-dim:#00b32d;  /* hover / pressed states */
+  --glow:      rgba(0, 255, 65, 0.35);
+  color-scheme: dark;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--heading);
+  font-family: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, serif;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* DS-4: Links are --accent, underlined on hover with a 2px offset. Focus rings are a 2px --accent outline. */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* DS-3: Section path labels in monospace */
+.section-label {
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* DS-5: Cards */
+.matrix-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  transition: border-color 0.15s ease;
+}
+
+.matrix-card:hover {
+  border-color: var(--accent);
+}
+
+/* DS-6: Tech tags */
+.tech-tag {
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+.tech-tag:hover {
+  color: var(--accent);
+}
+
+/* DS-7: Glow only on h1 and active nav */
+.glow-text {
+  text-shadow: 0 0 8px var(--glow);
+}
+
+/* DS-13: Code blocks matched to Matrix tokens */
+pre,
+pre.astro-code,
+pre.shiki {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 2px !important;
+  padding: 1rem 1.25rem !important;
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  overflow-x: auto !important;
+}
+
+:not(pre) > code {
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  color: var(--accent);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.15em 0.35em;
+}
+
+/* DS-9: Blinking block cursor after hero headline */
+.blinking-cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.15em;
+  background-color: var(--accent);
+  vertical-align: -0.15em;
+  margin-left: 0.25em;
+  animation: cursor-blink 1.06s steps(1) infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* DS-10: With prefers-reduced-motion: reduce, show no rain and no blinking */
+@media (prefers-reduced-motion: reduce) {
+  .blinking-cursor {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  #matrix-rain-canvas {
+    display: none !important;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

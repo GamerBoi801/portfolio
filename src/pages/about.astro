@@ -1,0 +1,234 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../site.config';
+import { formatDate } from '../lib/utils';
+
+const education = await getCollection('education');
+const experience = await getCollection('experience');
+const sortedExperience = experience.sort((a, b) => b.data.start.getTime() - a.data.start.getTime());
+
+const skills = await getCollection('skills');
+const sortedSkills = skills.sort((a, b) => a.data.order - b.data.order);
+
+const achievements = await getCollection('achievements');
+const sortedAchievements = achievements.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout
+  title={`About — ${SITE.name}`}
+  description={`Background, research experience, education at GIKI, and technical competencies of ${SITE.name}.`}
+  maxWidth="prose"
+>
+  <div class="py-12 sm:py-16">
+    <!-- Breadcrumb -->
+    <span class="section-label">~/about</span>
+
+    <header class="mb-12">
+      <h1 class="text-4xl sm:text-5xl font-semibold text-heading glow-text mb-6">
+        About Me
+      </h1>
+      <p class="text-xl text-text font-serif leading-relaxed mb-4">
+        I am a cybersecurity student and autonomous systems researcher focused on building fault-tolerant software, reverse engineering low-level binaries, and investigating telemetry fault containment.
+      </p>
+      <p class="text-base text-text/80 font-serif leading-relaxed">
+        Currently pursuing a BS in Cybersecurity at Ghulam Ishaq Khan Institute (GIKI), expected to graduate in June 2027. I spend my time writing Python and Rust supervisors for ArduPilot SITL, analyzing Linux kernel internals, competing in CTFs, and preparing for Summer 2027 systems & security research internships.
+      </p>
+    </header>
+
+    <!-- EXPERIENCE TIMELINE (FR-21) -->
+    <section class="mb-16">
+      <span class="section-label">~/experience</span>
+      <h2 class="text-2xl font-semibold text-heading mb-6">Experience & Research</h2>
+
+      <div class="space-y-8 border-l border-border pl-6 ml-2">
+        {sortedExperience.map((role) => (
+          <div class="relative group">
+            <!-- Timeline dot -->
+            <div class="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full bg-border group-hover:bg-accent group-hover:shadow-[0_0_8px_var(--glow)] transition-all"></div>
+
+            <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-1">
+              <h3 class="text-lg font-semibold text-heading group-hover:text-accent transition-colors">
+                {role.data.role}
+              </h3>
+              <span class="font-mono text-xs text-muted">
+                {formatDate(role.data.start)} &mdash; {role.data.end ? formatDate(role.data.end) : 'Present'}
+              </span>
+            </div>
+
+            <div class="font-mono text-xs text-muted mb-3">
+              {role.data.orgUrl ? (
+                <a href={role.data.orgUrl} target="_blank" rel="noopener noreferrer" class="hover:text-accent underline-offset-2 hover:underline">
+                  {role.data.org}
+                </a>
+              ) : (
+                <span>{role.data.org}</span>
+              )}
+              <span> &bull; {role.data.location}</span>
+            </div>
+
+            <p class="font-serif text-sm text-text/90 mb-3">
+              {role.data.summary}
+            </p>
+
+            {role.data.highlights && role.data.highlights.length > 0 && (
+              <ul class="space-y-1 text-sm font-mono text-muted mb-3 pl-2">
+                {role.data.highlights.map((h) => (
+                  <li class="flex items-start gap-2">
+                    <span class="text-accent">&bull;</span>
+                    <span class="text-text/80">{h}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div class="flex flex-wrap gap-1.5 font-mono text-xs">
+              {role.data.tech.map((t) => (
+                <span class="text-muted">[{t}]</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- EDUCATION (FR-21: GPA hidden per spec) -->
+    <section class="mb-16">
+      <span class="section-label">~/education</span>
+      <h2 class="text-2xl font-semibold text-heading mb-6">Education</h2>
+
+      <div class="space-y-6">
+        {education.map((edu) => (
+          <div class="matrix-card p-6">
+            <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-2">
+              <h3 class="text-xl font-semibold text-heading">
+                {edu.data.institution}
+              </h3>
+              <span class="font-mono text-xs text-muted">
+                {formatDate(edu.data.start, { year: 'numeric' })} &mdash; Expected {formatDate(edu.data.expectedEnd, { year: 'numeric', month: 'short' })}
+              </span>
+            </div>
+
+            <div class="font-mono text-xs text-accent mb-4">
+              {edu.data.degree} &bull; {edu.data.location}
+            </div>
+
+            <!-- Relevant Coursework -->
+            {edu.data.courses && edu.data.courses.length > 0 && (
+              <div class="mb-4">
+                <span class="font-mono text-xs text-muted uppercase tracking-wider block mb-2">Relevant Coursework</span>
+                <div class="flex flex-wrap gap-1.5 font-mono text-xs">
+                  {edu.data.courses.map((c) => (
+                    <span class="px-2 py-0.5 border border-border bg-bg text-text/80 rounded-[2px]">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Activities -->
+            {edu.data.activities && edu.data.activities.length > 0 && (
+              <div>
+                <span class="font-mono text-xs text-muted uppercase tracking-wider block mb-2">Leadership & Activities</span>
+                <ul class="space-y-1 font-mono text-xs text-muted">
+                  {edu.data.activities.map((act) => (
+                    <li class="flex items-center gap-2">
+                      <span class="text-accent">&bull;</span>
+                      <span class="text-text/80">{act}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- TECHNICAL SKILLS MATRIX (FR-21) -->
+    <section class="mb-16">
+      <span class="section-label">~/skills</span>
+      <h2 class="text-2xl font-semibold text-heading mb-6">Skills & Competencies</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {sortedSkills.map((skillGroup) => (
+          <div class="matrix-card p-5">
+            <h3 class="font-mono text-xs uppercase tracking-wider text-accent mb-3">
+              // {skillGroup.data.group}
+            </h3>
+            <div class="flex flex-wrap gap-1.5 font-mono text-xs">
+              {skillGroup.data.items.map((item) => (
+                <span class="text-muted hover:text-accent transition-colors">
+                  [{item}]
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ACHIEVEMENTS & HONORS (FR-21) -->
+    <section class="mb-16">
+      <span class="section-label">~/achievements</span>
+      <h2 class="text-2xl font-semibold text-heading mb-6">Honors & Achievements</h2>
+
+      <div class="space-y-4">
+        {sortedAchievements.map((ach) => (
+          <div class="matrix-card p-5 group flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-mono text-[11px] text-accent uppercase">[{ach.data.category}]</span>
+                {ach.data.rank && (
+                  <span class="font-mono text-xs text-heading font-semibold">
+                    {ach.data.rank}
+                  </span>
+                )}
+              </div>
+              <h3 class="text-base font-semibold text-heading group-hover:text-accent transition-colors">
+                {ach.data.title}
+              </h3>
+              {ach.data.description && (
+                <p class="font-serif text-xs text-text/80 mt-1">
+                  {ach.data.description}
+                </p>
+              )}
+            </div>
+
+            <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 font-mono text-xs text-muted shrink-0">
+              <span>{formatDate(ach.data.date)}</span>
+              {ach.data.url && (
+                <a
+                  href={ach.data.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-accent hover:underline text-xs"
+                >
+                  verify &rarr;
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- RESUME CALLOUT -->
+    <div class="p-6 matrix-card border-accent/40 bg-accent/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono">
+      <div>
+        <span class="text-accent font-semibold block text-sm mb-1">Looking for the formal single-page PDF?</span>
+        <span class="text-muted text-xs">Formatted for ATS and quick scanning by recruiters and lab advisors.</span>
+      </div>
+      <a
+        href={SITE.resume}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="bg-accent text-bg font-semibold px-4 py-2 rounded-[2px] hover:bg-accent-dim transition-colors text-xs whitespace-nowrap self-start sm:self-auto"
+      >
+        Download Resume [PDF] &rarr;
+      </a>
+    </div>
+
+  </div>
+</BaseLayout>

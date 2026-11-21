@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../site.config';
+import { formatDate } from '../../lib/utils';
+import { calculateReadingTime } from '../../lib/readingTime';
+
+const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout
+  title={`Writing & Notes — ${SITE.name}`}
+  description="Technical write-ups on binary exploitation, CTFs, malware analysis, and systems engineering logs."
+  maxWidth="prose"
+>
+  <div class="py-12 sm:py-16">
+    <div class="flex items-center justify-between mb-2">
+      <span class="section-label">~/writing</span>
+      <a href="/rss.xml" class="font-mono text-xs text-accent hover:underline flex items-center gap-1" title="RSS Feed">
+        <span>[rss feed]</span>
+      </a>
+    </div>
+
+    <header class="mb-12">
+      <h1 class="text-4xl sm:text-5xl font-semibold text-heading glow-text mb-4">
+        Writing & Notes
+      </h1>
+      <p class="text-lg text-text font-serif leading-relaxed">
+        Technical analysis, CTF challenges breakdown, low-level reverse engineering notes, and autonomous systems research logs.
+      </p>
+    </header>
+
+    <div class="space-y-6">
+      {sortedPosts.map((post) => {
+        const readingTime = calculateReadingTime(post.body || '');
+        return (
+          <article class="matrix-card p-6 group transition-all duration-200">
+            <div class="flex items-center justify-between text-xs font-mono text-muted mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-accent uppercase text-[11px] font-semibold">[{post.data.category}]</span>
+                {post.data.ctf && (
+                  <span class="text-amber-400">({post.data.ctf.event} &bull; {post.data.ctf.points} pts)</span>
+                )}
+              </div>
+              <div class="flex items-center gap-2">
+                <span>{readingTime}</span>
+                <span>&bull;</span>
+                <span>{formatDate(post.data.pubDate)}</span>
+              </div>
+            </div>
+
+            <h2 class="text-xl font-semibold text-heading group-hover:text-accent transition-colors mb-2 leading-snug">
+              <a href={`/writing/${post.id}`} class="hover:underline underline-offset-2">
+                {post.data.title}
+              </a>
+            </h2>
+
+            <p class="font-serif text-sm text-text/80 mb-4 line-clamp-2">
+              {post.data.description}
+            </p>
+
+            <div class="flex flex-wrap items-center justify-between pt-3 border-t border-border/60 gap-2 font-mono text-xs">
+              <div class="flex flex-wrap gap-1.5">
+                {post.data.tags.map((tag) => (
+                  <span class="text-muted hover:text-accent">[{tag}]</span>
+                ))}
+              </div>
+              <a href={`/writing/${post.id}`} class="text-accent hover:underline font-medium">
+                Read note &rarr;
+              </a>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>

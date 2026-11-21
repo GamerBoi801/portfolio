@@ -1,0 +1,106 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/utils';
+import { calculateReadingTime } from '../../lib/readingTime';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+  return allPosts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const readingTime = calculateReadingTime(post.body || '');
+---
+
+<BaseLayout
+  title={`${post.data.title} — Notes`}
+  description={post.data.description}
+  maxWidth="prose"
+  article={true}
+  publishedTime={post.data.pubDate.toISOString()}
+>
+  <article class="py-12 sm:py-16">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs font-mono text-muted mb-6">
+      <a href="/writing" class="text-accent hover:underline underline-offset-2">~/writing</a>
+      <span>/</span>
+      <span>{post.id}</span>
+    </div>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-border">
+      <div class="flex items-center gap-2 text-xs font-mono mb-3">
+        <span class="text-accent uppercase text-[11px] border border-accent/40 bg-accent/5 px-2 py-0.5 rounded-[2px]">
+          {post.data.category}
+        </span>
+        <span class="text-muted">&bull;</span>
+        <span class="text-muted">{readingTime}</span>
+        <span class="text-muted">&bull;</span>
+        <span class="text-muted">Published: {formatDate(post.data.pubDate)}</span>
+        {post.data.updatedDate && (
+          <span class="text-muted">(Updated: {formatDate(post.data.updatedDate)})</span>
+        )}
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-heading glow-text mb-4 leading-tight">
+        {post.data.title}
+      </h1>
+
+      <p class="text-lg text-text/90 font-serif leading-relaxed mb-6">
+        {post.data.description}
+      </p>
+
+      <!-- CTF Info Box if present -->
+      {post.data.ctf && (
+        <div class="p-4 matrix-card font-mono text-xs mb-6 border-l-2 border-l-accent flex flex-wrap gap-4">
+          <div>
+            <span class="text-muted block">CTF Event</span>
+            <span class="text-text font-semibold">{post.data.ctf.event}</span>
+          </div>
+          <div>
+            <span class="text-muted block">Challenge</span>
+            <span class="text-text">{post.data.ctf.challenge}</span>
+          </div>
+          <div>
+            <span class="text-muted block">Category</span>
+            <span class="text-accent uppercase">{post.data.ctf.category}</span>
+          </div>
+          {post.data.ctf.points && (
+            <div>
+              <span class="text-muted block">Points</span>
+              <span class="text-amber-400">{post.data.ctf.points}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <!-- Tags -->
+      <div class="flex flex-wrap gap-2 font-mono text-xs">
+        {post.data.tags.map((tag) => (
+          <span class="tech-tag">[{tag}]</span>
+        ))}
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="prose prose-invert max-w-none">
+      <Content />
+    </div>
+
+    <!-- Back to Writing -->
+    <div class="mt-16 pt-8 border-t border-border flex items-center justify-between font-mono text-xs">
+      <a href="/writing" class="text-accent hover:underline flex items-center gap-1">
+        <span>&larr;</span>
+        <span>all writing & notes</span>
+      </a>
+      <a href="/rss.xml" class="text-muted hover:text-accent">
+        [subscribe via RSS]
+      </a>
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,166 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../site.config';
+import { formatDate } from '../lib/utils';
+
+const publications = await getCollection('publications');
+const sortedPublications = publications.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Group publications by year
+const pubsByYear = sortedPublications.reduce<Record<string, typeof publications>>((acc, pub) => {
+  const year = pub.data.date.getFullYear().toString();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(pub);
+  return acc;
+}, {});
+
+const years = Object.keys(pubsByYear).sort((a, b) => parseInt(b) - parseInt(a));
+---
+
+<BaseLayout
+  title={`Publications & Research — ${SITE.name}`}
+  description="Research papers, preprints, and workshop publications in autonomous systems and cybersecurity."
+  maxWidth="prose"
+>
+  <div class="py-12 sm:py-16">
+    <span class="section-label">~/publications</span>
+
+    <header class="mb-12">
+      <h1 class="text-4xl sm:text-5xl font-semibold text-heading glow-text mb-4">
+        Publications & Preprints
+      </h1>
+      <p class="text-lg text-text font-serif leading-relaxed">
+        Peer-reviewed papers, workshop contributions, and research reports. Author names with bolding indicate my contribution.
+      </p>
+    </header>
+
+    {years.length > 0 ? (
+      <div class="space-y-12">
+        {years.map((year) => (
+          <section>
+            <div class="flex items-center gap-4 mb-6">
+              <h2 class="font-mono text-xl text-accent font-semibold">{year}</h2>
+              <div class="flex-1 h-[1px] bg-border"></div>
+            </div>
+
+            <div class="space-y-6">
+              {pubsByYear[year].map((pub) => (
+                <article class="matrix-card p-6 group">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="font-mono text-[11px] text-accent uppercase border border-accent/40 bg-accent/5 px-2 py-0.5 rounded-[2px]">
+                      {pub.data.type}
+                    </span>
+                    <span class="font-mono text-[11px] text-muted border border-border px-2 py-0.5 rounded-[2px]">
+                      {pub.data.status}
+                    </span>
+                    {pub.data.award && (
+                      <span class="font-mono text-[11px] text-amber-400 border border-amber-400/40 bg-amber-400/5 px-2 py-0.5 rounded-[2px]">
+                        ★ {pub.data.award}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 class="text-xl font-semibold text-heading mb-2 leading-snug">
+                    {pub.data.title}
+                  </h3>
+
+                  <p class="font-serif text-sm text-text/80 mb-2">
+                    {pub.data.authors.map((author, index) => {
+                      const isSelf = author.toLowerCase().includes('name') || author.toLowerCase().includes(SITE.authorNameInPapers.toLowerCase());
+                      return (
+                        <span>
+                          {isSelf ? <strong class="text-heading font-semibold underline decoration-accent/60 underline-offset-2">{author}</strong> : author}
+                          {index < pub.data.authors.length - 1 ? ', ' : ''}
+                        </span>
+                      );
+                    })}
+                  </p>
+
+                  <p class="font-mono text-xs text-muted mb-4">
+                    <span>{pub.data.venue}</span>
+                    {pub.data.venueShort && <span> ({pub.data.venueShort})</span>}
+                    <span> &bull; {formatDate(pub.data.date)}</span>
+                  </p>
+
+                  {pub.data.abstract && (
+                    <p class="font-serif text-sm text-text/90 mb-4 line-clamp-3">
+                      {pub.data.abstract}
+                    </p>
+                  )}
+
+                  <div class="pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+                    <div class="flex items-center gap-4">
+                      {pub.data.links.pdf && (
+                        <a href={pub.data.links.pdf} target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">
+                          [PDF]
+                        </a>
+                      )}
+                      {pub.data.links.arxiv && (
+                        <a href={pub.data.links.arxiv} target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">
+                          [arXiv]
+                        </a>
+                      )}
+                      {pub.data.links.code && (
+                        <a href={pub.data.links.code} target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent">
+                          [code]
+                        </a>
+                      )}
+                      {pub.data.links.slides && (
+                        <a href={pub.data.links.slides} target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent">
+                          [slides]
+                        </a>
+                      )}
+                    </div>
+
+                    {pub.data.bibtex && (
+                      <button
+                        type="button"
+                        class="copy-bibtex-btn text-muted hover:text-accent flex items-center gap-1 border border-border px-2 py-1 rounded-[2px]"
+                        data-bibtex={pub.data.bibtex}
+                      >
+                        <span>copy BibTeX</span>
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    ) : (
+      <div class="matrix-card p-8 border-dashed border-border text-center">
+        <span class="font-mono text-sm text-accent block mb-2">// research in progress</span>
+        <h2 class="text-xl font-semibold text-heading mb-3">No formal publications yet</h2>
+        <p class="font-serif text-sm text-text max-w-md mx-auto mb-4">
+          Currently investigating telemetry fault containment in MAVLink companion computers and kernel eBPF packet inspection. Preprints will be published here upon submission.
+        </p>
+        <a href="/projects" class="font-mono text-xs text-accent hover:underline">
+          Explore ongoing projects &rarr;
+        </a>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  // Copy BibTeX functionality
+  document.querySelectorAll<HTMLButtonElement>('.copy-bibtex-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const bibtex = btn.dataset.bibtex;
+      if (!bibtex) return;
+
+      try {
+        await navigator.clipboard.writeText(bibtex);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="text-accent font-semibold">copied!</span>';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy BibTeX:', err);
+      }
+    });
+  });
+</script>

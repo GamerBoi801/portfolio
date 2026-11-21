@@ -1,0 +1,255 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { CATEGORIES } from '../../content.config';
+import { sortProjects, getAllTags } from '../../lib/projects';
+
+const allProjects = await getCollection('projects', ({ data }) => !data.draft);
+const sortedProjects = sortProjects(allProjects);
+const allTags = getAllTags(sortedProjects);
+---
+
+<BaseLayout
+  title="Projects — Portfolio"
+  description="Engineering projects in autonomous systems, embedded robotics, cybersecurity, and machine learning."
+  maxWidth="grid"
+>
+  <div class="py-12 sm:py-16">
+    <!-- Breadcrumb Label -->
+    <span class="section-label">~/projects</span>
+    
+    <div class="max-w-prose mb-8">
+      <h1 class="text-4xl sm:text-5xl font-semibold text-heading glow-text mb-4">
+        Projects & Systems
+      </h1>
+      <p class="text-text font-serif text-lg leading-relaxed">
+        Autonomous flight controllers, kernel-level packet inspection, neural decompilers, and research prototypes. Filter by domain or tech stack.
+      </p>
+    </div>
+
+    <!-- FILTER BAR (FR-12) -->
+    <div class="mb-10 p-5 matrix-card flex flex-col gap-5" id="filter-container">
+      <!-- Category Filter -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-xs text-muted uppercase tracking-wider">Category</span>
+          <button
+            id="clear-filters"
+            class="font-mono text-xs text-muted hover:text-accent underline hidden transition-colors"
+          >
+            reset filters
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2 font-mono text-xs" id="category-filters">
+          <button
+            data-filter-category="all"
+            class="filter-cat-btn px-2.5 py-1 border border-accent bg-accent/10 text-accent rounded-[2px] transition-colors"
+          >
+            all ({sortedProjects.length})
+          </button>
+          {CATEGORIES.map((cat) => {
+            const count = sortedProjects.filter((p) => p.data.category === cat).length;
+            if (count === 0) return null;
+            return (
+              <button
+                data-filter-category={cat}
+                class="filter-cat-btn px-2.5 py-1 border border-border bg-surface text-muted hover:text-text hover:border-accent/50 rounded-[2px] transition-colors"
+              >
+                {cat} ({count})
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- Tech Tag Filter -->
+      <div>
+        <span class="font-mono text-xs text-muted uppercase tracking-wider block mb-2">Tech Tag</span>
+        <div class="flex flex-wrap gap-1.5 font-mono text-xs" id="tag-filters">
+          {allTags.map((tag) => (
+            <button
+              data-filter-tag={tag.toLowerCase()}
+              class="filter-tag-btn px-2 py-0.5 border border-border bg-surface text-muted hover:text-accent rounded-[2px] transition-colors"
+            >
+              [{tag.toLowerCase()}]
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Active Filter Status -->
+      <div class="pt-3 border-t border-border/50 flex items-center justify-between font-mono text-xs text-muted">
+        <div>
+          <span>Showing </span>
+          <span id="match-count" class="text-accent font-semibold">{sortedProjects.length}</span>
+          <span> of {sortedProjects.length} projects</span>
+        </div>
+        <div id="active-filter-indicator" class="hidden text-accent">
+          <span>Active filter: </span>
+          <span id="active-filter-text" class="font-semibold"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS GRID (FR-11) -->
+    <div
+      id="projects-grid"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+    >
+      {sortedProjects.map((project) => (
+        <ProjectCard project={project} />
+      ))}
+    </div>
+
+    <!-- Empty State for Filters -->
+    <div id="no-results" class="hidden py-16 text-center matrix-card p-8">
+      <span class="font-mono text-muted text-sm block mb-2">&gt; grep: no matching projects found</span>
+      <p class="font-serif text-text text-base mb-4">No projects match the selected category or tag.</p>
+      <button
+        id="reset-filter-btn"
+        class="font-mono text-xs text-accent border border-accent/40 px-3 py-1.5 rounded-[2px] hover:bg-accent/10"
+      >
+        Clear filters
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // FR-12: Client-side filtering with URL state synchronization
+  function initProjectFilters() {
+    const grid = document.getElementById('projects-grid');
+    if (!grid) return;
+
+    const cards = grid.querySelectorAll<HTMLElement>('article');
+    const categoryButtons = document.querySelectorAll<HTMLButtonElement>('.filter-cat-btn');
+    const tagButtons = document.querySelectorAll<HTMLButtonElement>('.filter-tag-btn');
+    const matchCount = document.getElementById('match-count');
+    const noResults = document.getElementById('no-results');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const resetFilterBtn = document.getElementById('reset-filter-btn');
+    const activeIndicator = document.getElementById('active-filter-indicator');
+    const activeFilterText = document.getElementById('active-filter-text');
+
+    let currentCategory = 'all';
+    let currentTag = '';
+
+    function parseURLParams() {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get('category') || 'all';
+      const tag = params.get('tag') || '';
+      return { cat, tag };
+    }
+
+    function syncURL() {
+      const params = new URLSearchParams();
+      if (currentCategory !== 'all') params.set('category', currentCategory);
+      if (currentTag) params.set('tag', currentTag);
+
+      const newUrl = params.toString()
+        ? `${window.location.pathname}?${params.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+
+    function applyFilters() {
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const cardCategory = card.dataset.category || '';
+        const cardTags = (card.dataset.tags || '').toLowerCase().split(',');
+
+        const matchesCat = currentCategory === 'all' || cardCategory === currentCategory;
+        const matchesTag = !currentTag || cardTags.includes(currentTag.toLowerCase());
+
+        if (matchesCat && matchesTag) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Update counters and UI
+      if (matchCount) matchCount.textContent = visibleCount.toString();
+      if (noResults) {
+        noResults.classList.toggle('hidden', visibleCount > 0);
+      }
+
+      // Update Category Buttons
+      categoryButtons.forEach((btn) => {
+        const cat = btn.dataset.filterCategory;
+        const isSelected = cat === currentCategory;
+        if (isSelected) {
+          btn.classList.add('border-accent', 'bg-accent/10', 'text-accent');
+          btn.classList.remove('border-border', 'bg-surface', 'text-muted');
+        } else {
+          btn.classList.remove('border-accent', 'bg-accent/10', 'text-accent');
+          btn.classList.add('border-border', 'bg-surface', 'text-muted');
+        }
+      });
+
+      // Update Tag Buttons
+      tagButtons.forEach((btn) => {
+        const tag = btn.dataset.filterTag;
+        const isSelected = tag === currentTag.toLowerCase();
+        if (isSelected) {
+          btn.classList.add('border-accent', 'bg-accent/10', 'text-accent');
+          btn.classList.remove('border-border', 'bg-surface', 'text-muted');
+        } else {
+          btn.classList.remove('border-accent', 'bg-accent/10', 'text-accent');
+          btn.classList.add('border-border', 'bg-surface', 'text-muted');
+        }
+      });
+
+      // Indicator and Clear button
+      const hasFilter = currentCategory !== 'all' || !!currentTag;
+      if (clearFiltersBtn) clearFiltersBtn.classList.toggle('hidden', !hasFilter);
+      if (activeIndicator && activeFilterText) {
+        activeIndicator.classList.toggle('hidden', !hasFilter);
+        const parts = [];
+        if (currentCategory !== 'all') parts.push(`category: ${currentCategory}`);
+        if (currentTag) parts.push(`tag: [${currentTag}]`);
+        activeFilterText.textContent = parts.join(', ');
+      }
+
+      syncURL();
+    }
+
+    // Category button clicks
+    categoryButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentCategory = btn.dataset.filterCategory || 'all';
+        applyFilters();
+      });
+    });
+
+    // Tag button clicks
+    tagButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.filterTag || '';
+        currentTag = currentTag === tag ? '' : tag; // Toggle
+        applyFilters();
+      });
+    });
+
+    function resetFilters() {
+      currentCategory = 'all';
+      currentTag = '';
+      applyFilters();
+    }
+
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', resetFilters);
+    if (resetFilterBtn) resetFilterBtn.addEventListener('click', resetFilters);
+
+    // Initial load from URL
+    const { cat, tag } = parseURLParams();
+    currentCategory = cat;
+    currentTag = tag;
+    applyFilters();
+  }
+
+  // Run on mount
+  initProjectFilters();
+</script>

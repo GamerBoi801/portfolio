@@ -1,0 +1,39 @@
+- id: languages
+  group: Languages
+  items:
+    - Python
+    - Rust
+    - C/C++
+    - Go
+    - TypeScript
+    - Bash
+  order: 1
+- id: security
+  group: Security & Systems
+  items:
+    - Reverse Engineering
+    - Malware Analysis
+    - Binary Exploitation
+    - ArduPilot/MAVLink
+    - Linux Kernel Internals
+    - Network Protocols
+  order: 2
+- id: ml-ai
+  group: Machine Learning & Robotics
+  items:
+    - PyTorch
+    - Computer Vision
+    - SITL Simulation
+    - Reinforcement Learning
+    - Anomaly Detection
+  order: 3
+- id: tools
+  group: Tools & Infra
+  items:
+    - Git
+    - Docker
+    - Ghidra
+    - GDB / Pwndbg
+    - Wireshark
+    - Cloudflare
+  order: 4

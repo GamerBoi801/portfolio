@@ -1,0 +1,63 @@
+---
+import '../styles/global.css';
+import SEO from '../components/SEO.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  article?: boolean;
+  publishedTime?: string;
+  maxWidth?: 'prose' | 'grid';
+}
+
+const {
+  title,
+  description,
+  image,
+  article = false,
+  publishedTime,
+  maxWidth = 'grid',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <SEO
+      title={title}
+      description={description}
+      image={image}
+      article={article}
+      publishedTime={publishedTime}
+    />
+  </head>
+  <body class="bg-bg text-text min-h-screen flex flex-col justify-between selection:bg-accent selection:text-bg antialiased">
+    <!-- A11y: Skip to main content -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 bg-accent text-bg px-4 py-2 font-mono text-sm font-semibold rounded-[2px]"
+    >
+      Skip to content
+    </a>
+
+    <!-- Top Navigation -->
+    <Nav />
+
+    <!-- Main Page Content -->
+    <main
+      id="main-content"
+      class:list={[
+        'w-full mx-auto px-4 sm:px-6 lg:px-8 flex-1',
+        maxWidth === 'prose' ? 'max-w-prose' : 'max-w-grid',
+      ]}
+    >
+      <slot />
+    </main>
+
+    <!-- Global Footer -->
+    <Footer />
+  </body>
+</html>

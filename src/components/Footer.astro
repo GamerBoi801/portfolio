@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import { SITE } from '../site.config';
+import SocialIcon from './SocialIcon.astro';
+
+const socials = await getCollection('socials');
+const sortedSocials = socials.sort((a, b) => a.data.order - b.data.order);
+
+// Obfuscate email for anti-scraping: split into user and domain
+const emailParts = SITE.email.split('@');
+const emailUser = emailParts[0];
+const emailDomain = emailParts[1] || 'example.com';
+
+const lastUpdated = new Date().toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<footer class="w-full border-t border-border mt-24 py-12 bg-bg transition-colors">
+  <div class="max-w-grid mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      <!-- Social Profiles & Email -->
+      <div class="flex flex-wrap items-center gap-4 text-xs font-mono">
+        {sortedSocials.map((item) => {
+          const isEmail = item.data.id === 'email';
+          if (isEmail) {
+            return (
+              <a
+                href={`mailto:${SITE.email}`}
+                class="flex items-center gap-1.5 text-text hover:text-accent hover:underline underline-offset-2 transition-colors group"
+                title="Send Email (Protected)"
+              >
+                <SocialIcon icon={item.data.icon} class="w-3.5 h-3.5 text-muted group-hover:text-accent transition-colors" />
+                <span class="email-obfuscated inline-flex" data-user={emailUser} data-domain={emailDomain}>
+                  <span class="sr-only">{SITE.email}</span>
+                  <span class="font-mono text-muted group-hover:text-accent">{emailUser} [at] {emailDomain}</span>
+                </span>
+              </a>
+            );
+          }
+          return (
+            <a
+              href={item.data.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-1.5 text-text hover:text-accent hover:underline underline-offset-2 transition-colors group"
+              title={item.data.label}
+            >
+              <SocialIcon icon={item.data.icon} class="w-3.5 h-3.5 text-muted group-hover:text-accent transition-colors" />
+              <span>{item.data.label}</span>
+            </a>
+          );
+        })}
+      </div>
+
+      <!-- Last Updated and Source Repo (FR-2) -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 font-mono text-xs text-muted">
+        <div>
+          <span>Updated: </span>
+          <span class="text-text">{lastUpdated}</span>
+        </div>
+        <div class="hidden sm:inline text-border">|</div>
+        <a
+          href="https://github.com/GamerBoi801/portfolio"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-muted hover:text-accent hover:underline underline-offset-2 transition-colors flex items-center gap-1"
+        >
+          <span>source code &rarr;</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Copyright / System line -->
+    <div class="mt-8 pt-6 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center text-[11px] font-mono text-muted">
+      <span>&copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.</span>
+      <span class="mt-2 sm:mt-0 text-muted/70">Matrix Minimal System &bull; Static Astro Architecture</span>
+    </div>
+  </div>
+</footer>
